@@ -64,12 +64,6 @@ stages:
               artifactName: WebAppArtifact
               targetPath: $(System.DefaultWorkingDirectory)
 
-          # Add a script to confirm downloaded files
-          - script: |
-              echo "Contents of the downloaded artifact:"
-              ls -R $(System.DefaultWorkingDirectory)
-            displayName: 'Debug Artifact Contents'
-
           - task: AzureWebApp@1
             displayName: 'Deploy to Azure Web App'
             inputs:
