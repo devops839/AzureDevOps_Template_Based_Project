@@ -38,6 +38,14 @@ stages:
               projects: '**/*.csproj'
               arguments: '--configuration ${{ parameters.buildConfiguration }}'
 
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Application'
+            inputs:
+              command: publish
+              publishWebProjects: true
+              arguments: '--configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Artifact'
             inputs:
@@ -55,7 +63,7 @@ stages:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifacts'
             inputs:
-              artifact: WebAppArtifact
+              artifactName: WebAppArtifact
               targetPath: $(System.DefaultWorkingDirectory)
 
           - task: AzureWebApp@1
