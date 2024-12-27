@@ -28,14 +28,14 @@ stages:
           - task: DotNetCoreCLI@2
             displayName: 'Restore NuGet Packages'
             inputs:
-              azureSubscription: 'Pay-As-You-Go(142ced07-dc62-4882-a02f-d99696ac9d8c)'
+              azureSubscription: 'azure_sc'
               command: 'restore'
               projects: '**/*.csproj'
 
           - task: DotNetCoreCLI@2
             displayName: 'Build Solution'
             inputs:
-              azureSubscription: 'Pay-As-You-Go(142ced07-dc62-4882-a02f-d99696ac9d8c)'
+              azureSubscription: 'azure_sc'
               command: 'build'
               projects: '**/*.csproj'
               arguments: '--configuration ${{ parameters.buildConfiguration }}'
@@ -43,7 +43,7 @@ stages:
           - task: DotNetCoreCLI@2
             displayName: 'Publish Artifacts'
             inputs:
-              azureSubscription: 'Pay-As-You-Go(142ced07-dc62-4882-a02f-d99696ac9d8c)'
+              azureSubscription: 'azure_sc'
               command: 'publish'
               publishWebProjects: true
               arguments: '--configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)'
