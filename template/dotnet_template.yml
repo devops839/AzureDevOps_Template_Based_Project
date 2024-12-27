@@ -1,4 +1,4 @@
-parameters:
+parameters: 
   - name: buildConfiguration
     type: string
     default: 'Release'
@@ -55,18 +55,18 @@ stages:
     jobs:
       - job: DeployWebApp
         displayName: Deploy .NET Application to Azure Web App
-          steps:
-            - task: DownloadPipelineArtifact@2
-              displayName: 'Download Build Artifacts'
-              inputs:
-                artifact: WebAppArtifact
-                targetPath: $(System.DefaultWorkingDirectory)
+        steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Build Artifacts'
+            inputs:
+              artifact: WebAppArtifact
+              targetPath: $(System.DefaultWorkingDirectory)
 
-            - task: AzureWebApp@1
-              displayName: 'Deploy to Azure Web App'
-              inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}
-                appType: webApp
-                appName: ${{ parameters.azureWebAppName }}
-                resourceGroupName: ${{ parameters.resourceGroupName }}
-                package: $(System.DefaultWorkingDirectory)/WebAppArtifact/**/*.zip
+          - task: AzureWebApp@1
+            displayName: 'Deploy to Azure Web App'
+            inputs:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              appType: webApp
+              appName: ${{ parameters.azureWebAppName }}
+              resourceGroupName: ${{ parameters.resourceGroupName }}
+              package: $(System.DefaultWorkingDirectory)/WebAppArtifact/**/*.zip
