@@ -1,0 +1,80 @@
+parameters:
+  - name: buildConfiguration
+    type: string
+    default: 'Release'
+  - name: azureSubscription
+    type: string
+  - name: azureWebAppName
+    type: string
+  - name: resourceGroupName
+    type: string
+
+stages:
+  - stage: Build
+    displayName: Build the Application
+    jobs:
+      - job: BuildJob
+        displayName: Build the .NET Application
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core SDK'
+            inputs:
+              packageType: sdk
+              version: '8.0.404'
+              installationPath: $(Agent.ToolsDirectory)/dotnet
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet Packages'
+            inputs:
+              azureSubscription: 'Pay-As-You-Go(142ced07-dc62-4882-a02f-d99696ac9d8c)'
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Build Solution'
+            inputs:
+              azureSubscription: 'Pay-As-You-Go(142ced07-dc62-4882-a02f-d99696ac9d8c)'
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration ${{ parameters.buildConfiguration }}'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Artifacts'
+            inputs:
+              azureSubscription: 'Pay-As-You-Go(142ced07-dc62-4882-a02f-d99696ac9d8c)'
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)'
+
+          - publish: $(Build.ArtifactStagingDirectory)
+            artifact: WebAppArtifact
+
+  - stage: Deploy
+    displayName: Deploy to Azure Web App
+    dependsOn: Build
+    jobs:
+      - deployment: DeployWebApp
+        displayName: Deploy .NET Application to Azure Web App
+        environment: 'Production'
+        pool:
+          vmImage: 'windows-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Build Artifacts'
+                  inputs:
+                    artifact: WebAppArtifact
+                    targetPath: $(System.DefaultWorkingDirectory)
+
+                - task: AzureWebApp@1
+                  displayName: 'Deploy to Azure Web App'
+                  inputs:
+                    azureSubscription: ${{ parameters.azureSubscription }}
+                    appType: webApp
+                    appName: ${{ parameters.azureWebAppName }}
+                    resourceGroupName: ${{ parameters.resourceGroupName }}
+                    package: $(System.DefaultWorkingDirectory)/WebAppArtifact/*.zip
