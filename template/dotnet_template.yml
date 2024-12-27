@@ -2,10 +2,13 @@ parameters:
   - name: buildConfiguration
     type: string
     default: 'Release'
+
   - name: azureSubscription
     type: string
+
   - name: azureWebAppName
     type: string
+    
   - name: resourceGroupName
     type: string
 
