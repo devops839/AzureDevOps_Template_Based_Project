@@ -15,8 +15,6 @@ stages:
     jobs:
       - job: BuildJob
         displayName: Build the .NET Application
-        pool:
-          vmImage: 'windows-latest'
         steps:
           - task: UseDotNet@2
             displayName: 'Use .NET Core SDK'
