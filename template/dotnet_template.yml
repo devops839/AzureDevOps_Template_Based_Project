@@ -73,4 +73,4 @@ stages:
               appType: webApp
               appName: ${{ parameters.azureWebAppName }}
               resourceGroupName: ${{ parameters.resourceGroupName }}
-              package: $(System.DefaultWorkingDirectory)/WebAppArtifact/**/*.zip
+              package: $(System.DefaultWorkingDirectory)/WebAppArtifact/*.zip
