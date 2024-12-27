@@ -28,25 +28,23 @@ stages:
           - task: DotNetCoreCLI@2
             displayName: 'Restore NuGet Packages'
             inputs:
-              azureSubscription: 'azure_sc'
-              command: 'restore'
+              command: restore
               projects: '**/*.csproj'
 
           - task: DotNetCoreCLI@2
             displayName: 'Build Solution'
             inputs:
-              azureSubscription: 'azure_sc'
-              command: 'build'
+              command: build
               projects: '**/*.csproj'
               arguments: '--configuration ${{ parameters.buildConfiguration }}'
 
           - task: DotNetCoreCLI@2
             displayName: 'Publish Artifacts'
             inputs:
-              azureSubscription: 'azure_sc'
-              command: 'publish'
+              command: publish
               publishWebProjects: true
               arguments: '--configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
 
           - publish: $(Build.ArtifactStagingDirectory)
             artifact: WebAppArtifact
@@ -55,26 +53,20 @@ stages:
     displayName: Deploy to Azure Web App
     dependsOn: Build
     jobs:
-      - deployment: DeployWebApp
+      - job: DeployWebApp
         displayName: Deploy .NET Application to Azure Web App
-        environment: 'Production'
-        pool:
-          vmImage: 'windows-latest'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: DownloadPipelineArtifact@2
-                  displayName: 'Download Build Artifacts'
-                  inputs:
-                    artifact: WebAppArtifact
-                    targetPath: $(System.DefaultWorkingDirectory)
+          steps:
+            - task: DownloadPipelineArtifact@2
+              displayName: 'Download Build Artifacts'
+              inputs:
+                artifact: WebAppArtifact
+                targetPath: $(System.DefaultWorkingDirectory)
 
-                - task: AzureWebApp@1
-                  displayName: 'Deploy to Azure Web App'
-                  inputs:
-                    azureSubscription: ${{ parameters.azureSubscription }}
-                    appType: webApp
-                    appName: ${{ parameters.azureWebAppName }}
-                    resourceGroupName: ${{ parameters.resourceGroupName }}
-                    package: $(System.DefaultWorkingDirectory)/WebAppArtifact/*.zip
+            - task: AzureWebApp@1
+              displayName: 'Deploy to Azure Web App'
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                ppType: webApp
+                appName: ${{ parameters.azureWebAppName }}
+                resourceGroupName: ${{ parameters.resourceGroupName }}
+                package: $(System.DefaultWorkingDirectory)/WebAppArtifact/**/*.zip
